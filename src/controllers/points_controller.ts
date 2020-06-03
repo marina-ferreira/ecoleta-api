@@ -16,7 +16,7 @@ class PointsController {
       items
     } = request.body
 
-    const inserted_ids = await transaction('points').insert({
+    const point = {
       image: 'image-fake',
       name,
       email,
@@ -25,16 +25,19 @@ class PointsController {
       longitude,
       city,
       uf
-    }).returning('id')
+    }
 
-    const pointItems = items.map((item_id: number) => ({
-      item_id,
-      point_id: inserted_ids[0]
-    }))
+    const inserted_ids = await transaction('points').insert(point).returning('id')
+    const point_id = inserted_ids[0]
+
+    const pointItems = items.map((item_id: number) => ({ item_id, point_id }))
 
     await transaction('point_items').insert(pointItems)
 
-    return response.json({ success: true })
+    return response.json({
+      id: point_id,
+      ...point
+    })
   }
 }
 
