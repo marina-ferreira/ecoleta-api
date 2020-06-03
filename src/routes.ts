@@ -16,6 +16,8 @@ routes.get('/items', async (request, response) => {
 
 routes.post('/points', async (request, response) => {
   const db = request.app.get('db')
+  const transaction = await db.transaction()
+
   const {
     name,
     email,
@@ -27,7 +29,7 @@ routes.post('/points', async (request, response) => {
     items
   } = request.body
 
-  const inserted_ids = await db('points').insert({
+  const inserted_ids = await transaction('points').insert({
     image: 'image-fake',
     name,
     email,
@@ -43,7 +45,7 @@ routes.post('/points', async (request, response) => {
     point_id: inserted_ids[0]
   }))
 
-  await db('point_items').insert(pointItems)
+  await transaction('point_items').insert(pointItems)
 
   return response.json({ success: true })
 })
