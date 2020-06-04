@@ -32,7 +32,7 @@ class PointsController {
     } = request.body
 
     const point = {
-      image: 'image-fake',
+      image: 'https://source.unsplash.com/ATgfRqpFfFI',
       name,
       email,
       whatsapp,
