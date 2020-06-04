@@ -1,10 +1,25 @@
 import { Request, Response } from 'express'
 
 class PointsController {
-  async create(request: Request, response: Response) {
+  async index(request: Request, response: Response) {
     const db = request.app.get('db')
-    const transaction = await db.transaction()
+    const { city, uf, items } = request.query
+    const parsedItems = String(items)
+      .split(',')
+      .map(item => Number(item.trim()))
 
+    const points = await db('points')
+      .join('point_items', 'points.id', '=', 'point_items.point_id')
+      .whereIn('point_items.item_id', parsedItems)
+      .where('city', String(city))
+      .where('uf', String(uf))
+      .distinct()
+      .select('points.*')
+
+    return response.json(points)
+  }
+
+  async create(request: Request, response: Response) {
     const {
       name,
       email,
@@ -27,17 +42,34 @@ class PointsController {
       uf
     }
 
+    const db = request.app.get('db')
+    const transaction = await db.transaction()
     const inserted_ids = await transaction('points').insert(point).returning('id')
     const point_id = inserted_ids[0]
-
     const pointItems = items.map((item_id: number) => ({ item_id, point_id }))
 
     await transaction('point_items').insert(pointItems)
+    await transaction.commit()
 
     return response.json({
       id: point_id,
       ...point
     })
+  }
+
+  async show(request: Request, response: Response) {
+    const { id } = request.params
+    const db = request.app.get('db')
+    const point = await db('points').where('id', id).first()
+    const items = await db('items')
+      .join('point_items', 'items.id', '=', 'point_items.item_id')
+      .where('point_items.point_id', id)
+
+    if (!point) {
+      return response.status(404).json({ message: 'Point not found' })
+    }
+
+    return response.json({ point, items })
   }
 }
 
