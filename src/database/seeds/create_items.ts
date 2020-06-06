@@ -7,5 +7,6 @@ export const seed = async (knex: Knex) => {
     { title: 'Papéis e Papelão', image: 'paper.svg' },
     { title: 'Resíduos Orgânicos', image: 'organics.svg' },
     { title: 'Óleo de Cozinha', image: 'oleo.svg' }
+    { title: 'Resíduos Eletrônicos', image: 'eletronics.svg' }
   ])
 }
