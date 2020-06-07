@@ -6,7 +6,7 @@ module.exports = {
     host: 'localhost',
     user: 'postgres',
     password: '',
-    database: 'ecoleta-dev'
+    database: 'ecoleta_dev'
   },
   migrations: {
     directory: path.resolve(__dirname, 'src', 'database', 'migrations')

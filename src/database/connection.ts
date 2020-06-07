@@ -6,7 +6,7 @@ const connection = knex({
     host: 'localhost',
     user: 'postgres',
     password: '',
-    database: 'ecoleta-dev'
+    database: 'ecoleta_dev'
   }
 })
 
