@@ -3,6 +3,8 @@ import { Request, Response } from 'express'
 class PointsController {
   async index(request: Request, response: Response) {
     const db = request.app.get('db')
+    const { headers: { host }, protocol } = request
+    const baseUrl = `${protocol}://${host}`
     const { city, uf, items } = request.query
     const parsedItems = String(items)
       .split(',')
@@ -18,7 +20,7 @@ class PointsController {
 
     const serializedPoints = points.map(point => ({
       ...point,
-      image_url: `http://192.168.1.34:3333/uploads/${point.image}`
+      image_url: `${baseUrl}/uploads/${point.image}`
     }))
 
     return response.json(serializedPoints)
@@ -67,6 +69,8 @@ class PointsController {
 
   async show(request: Request, response: Response) {
     const { id } = request.params
+    const { headers: { host }, protocol } = request
+    const baseUrl = `${protocol}://${host}`
     const db = request.app.get('db')
     const point = await db('points').where('id', id).first()
     const items = await db('items')
@@ -79,7 +83,7 @@ class PointsController {
 
     const serializedPoint ={
       ...point,
-      image_url: `http://192.168.1.34:3333/uploads/${point.image}`
+      image_url: `${baseUrl}/uploads/${point.image}`
     }
 
     return response.json({ point: serializedPoint, items })
