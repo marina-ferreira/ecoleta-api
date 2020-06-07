@@ -16,7 +16,12 @@ class PointsController {
       .distinct()
       .select('points.*')
 
-    return response.json(points)
+    const serializedPoints = points.map(point => ({
+      ...point,
+      image_url: `http://192.168.1.34:3333/uploads/${point.image}`
+    }))
+
+    return response.json(serializedPoints)
   }
 
   async create(request: Request, response: Response) {
@@ -32,7 +37,7 @@ class PointsController {
     } = request.body
 
     const point = {
-      image: 'https://source.unsplash.com/ATgfRqpFfFI',
+      image: request.file.filename,
       name,
       email,
       whatsapp,
@@ -46,7 +51,10 @@ class PointsController {
     const transaction = await db.transaction()
     const inserted_ids = await transaction('points').insert(point).returning('id')
     const point_id = inserted_ids[0]
-    const pointItems = items.map((item_id: number) => ({ item_id, point_id }))
+    const pointItems = items
+      .split(',')
+      .map((item: string) => Number(item.trim()))
+      .map((item_id: number) => ({ item_id, point_id }))
 
     await transaction('point_items').insert(pointItems)
     await transaction.commit()
@@ -69,7 +77,12 @@ class PointsController {
       return response.status(404).json({ message: 'Point not found' })
     }
 
-    return response.json({ point, items })
+    const serializedPoint ={
+      ...point,
+      image_url: `http://192.168.1.34:3333/uploads/${point.image}`
+    }
+
+    return response.json({ point: serializedPoint, items })
   }
 }
 
